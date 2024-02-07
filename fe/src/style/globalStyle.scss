@@ -1,0 +1,23 @@
+/*
+    qui va messo lo stile globale di tutta l'applicazione.
+    questo stile viene applicato per ultimo, e quindi
+    può potenzialmente fare l'override di tutto, ma
+    gli override dello stile di naive vanno fatti
+    in App.vue nell'oggetto "themeOverrides"
+*/
+@import '@/style/globalVariables.module.scss';
+
+/*body {
+    background-color: cornflowerblue;
+}*/
+
+body{
+    background-color: $bodyBGColor;
+    /*color:white;*/
+}
+/*button{
+    color:white;
+}
+span.n-button__content{
+    color:white;
+}*/

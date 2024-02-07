@@ -1,0 +1,23 @@
+@be_HostAddress = http://localhost:5179
+
+GET {{be_HostAddress}}/api/Values/1
+Accept: application/json
+
+###
+
+POST {{be_HostAddress}}/api/Auth/Login
+Accept: application/json
+Content-Type: application/json
+
+{
+	"username": "admin",
+	"password": "Password01!"
+}
+
+###
+
+GET {{be_HostAddress}}/api/values/0
+
+###
+
+

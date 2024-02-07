@@ -1,0 +1,90 @@
+﻿/*
+    importante! questo file si deve chiamare *.module.scss altrimenti non lo si può
+    importare nel ts di un component e usarne le variabili nel codice.
+
+    nel ts poi si possono importare così:
+    1) import variables from "./style/globalVariables.module.scss";
+    2) const { color, bodyBGColor } = variables;
+    dove col primo si importa tutto e li si possono poi usare ad es con variables.color
+    o variables.bodyBGColor.
+    col secondo invece oltre al primo si possono importare solo certi valori
+    e usarli direttamente come variabili, tipo color e bodyBGColor.
+
+
+    questo sotto ci sono esempi completi di component con i vari casi possibili
+    di applicazione delle variabili, sia inline che nel tag <style> che nel
+    tema generico:*/
+
+/*<template>
+    <n-config-provider :theme="darkTheme"
+                       :theme-overrides="themeOverrides">
+        <n-theme-editor>
+            <header>
+                <div class="wrapper">
+                    <!--<HelloWorld msg="You did it!" />-->
+                    <div :style="{'background-color': variables.color}">asd</div>
+                    <div class="bgColor">asd2</div>
+                    <div class="scssTest">asd3</div>
+                    <nav>
+                        <RouterLink to="/">Home</RouterLink>
+                        <RouterLink to="/about">About</RouterLink>
+                    </nav>
+                </div>
+            </header>
+            <RouterView />
+        </n-theme-editor>
+    </n-config-provider>
+</template>
+
+<style scoped lang="scss">*/
+/*questo fa l'import direttamente del file per usarne
+        le variabili
+    */
+/*@import "@/style/globalVariables.module.scss";
+
+    .scssTest {
+        color: $color;
+    }
+
+    .bgColor {*/
+/*entrambi validi*/
+/*background-color: v-bind(color2);*/
+/*background-color: v-bind(variables.color2);*/
+/*}
+</style>
+<script setup lang="ts">
+    import { RouterLink, RouterView } from 'vue-router'
+    import { NConfigProvider, NThemeEditor, darkTheme } from 'naive-ui'
+    import { onMounted, ref } from 'vue';
+    import variables from "./style/globalVariables.module.scss";
+    const { color, color2, bodyBGColor } = variables;
+
+    onMounted(() => {
+        console.log(variables);
+        console.log(variables.color);
+        console.log(color);
+        console.log(color2);
+        console.log(bodyBGColor);
+    });*/
+/*fa l'override del tema generico di naive con le variabili nel globalVariables.module.scss*/
+/*const themeOverrides = {
+        common: {
+            primaryColor: variables.color,
+            infoColor: 'black'
+        }
+    }
+</script>*/
+
+$popoverColor: rgba(33, 33, 150, 1);
+$primaryColor: yellow;
+$color2: red;
+$fontStyle: italic;
+$fontWeight: 500;
+$bodyBGColor: lightblue;
+
+:export {
+    popoverColor: $popoverColor;
+    primaryColor: $primaryColor;
+    color2: $color2;
+    bodyBGColor: $bodyBGColor;
+}
