@@ -1,6 +1,7 @@
 ﻿const constantValues = {
     authClaims: {
-        CANDOANYTHING: "CANDOANYTHING"
+        CANDOANYTHING: "CANDOANYTHING",
+        CanRegisterToSignalR: "CanRegisterToSignalR"
     },
     backendUrl: 'http://localhost:5179/api/'
 };
