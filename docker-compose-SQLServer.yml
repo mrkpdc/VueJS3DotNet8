@@ -52,7 +52,7 @@ services:
       context: ./fe
       dockerfile: ./Dockerfile
     ports: 
-      - 4200:80
+      - 8080:80
     links:
       - vuejs3_net8_be
 
