@@ -62,6 +62,15 @@
                                                 </button>
                                             </router-link>
                                         </div>
+                                        <div class="navigationItem" v-if="Auth.checkClaim('CanRegisterToSignalR')">
+                                            <router-link to="/signalr" class="fs-5 text-decoration-none">
+                                                <button class="navigationButton bg-transparent navigationSubItem baseTextColor"
+                                                        type="button"
+                                                        v-on:click="navBarIsOpen = false">
+                                                    {{$t('signalR')}}
+                                                </button>
+                                            </router-link>
+                                        </div>
                                         <div class="mt-1" v-if="Auth.checkClaim('CANDOANYTHING')">
                                             <button class="navigationButton bg-transparent"
                                                     type="button"

@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@microsoft/signalr": "^8.0.0",
     "axios": "^1.6.7",
     "bootstrap": "^5.3.2",
     "pinia": "^2.1.7",
