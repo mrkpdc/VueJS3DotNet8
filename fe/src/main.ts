@@ -38,14 +38,26 @@ import '@/style/bootstrapOverrides.scss';
  viene caricato per ultimo per eventualmente sovrascrivere
  anche i settaggi di default di bootstrap*/
 import '@/style/globalStyle.scss';
+import { useAuthStore } from '@/stores/auth';
 
 
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(function (request) {
     // Do something before request is sent
-    request.url = constantValues.backendUrl + request.url;
+    if (!request.url?.startsWith(constantValues.backendUrl))
+        request.url = constantValues.backendUrl + request.url;
     //console.log("request");
     //console.log(request);
+
+    if (!request.url.endsWith('Auth/RefreshTokens')) {
+        const token = useAuthStore().getJWTToken();
+        request.headers.setAuthorization("Bearer " + token);
+    }
+    else {
+        const refreshToken = useAuthStore().getJWTRefreshToken();
+        request.headers.setAuthorization("Bearer " + refreshToken);
+    }
+
     return request;
 }, function (error) {
     // Do something with request error
@@ -61,19 +73,59 @@ axios.interceptors.response.use(function (response) {
     //console.log("response");
     //console.log(response);
     return response;
-}, function (error) {
+}, async function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
-    console.error(error);
-    if (error.response.status == 401 /*|| error.response.status == 404*/) {
-        Auth.logout();
+    //console.error("response error: " + error.config.url, error);
+    if (error.response.status === 401/*|| error.response.status == 404*/) {
+        if (!error.config.url.endsWith('Auth/RefreshTokens')) {
+            const refreshToken = useAuthStore().getJWTRefreshToken();
+            if (refreshToken) {
+                let refreshingToken = true;
+                let errorRefreshingToken = false;
+
+                Auth.refreshTokens(refreshToken).then((response: any) => {
+                    var claims = response.data.claims;
+                    var jwtToken = response.data.token;
+                    var jwtRefreshToken = response.data.refreshToken;
+
+                    useAuthStore().setClaims(claims);
+                    useAuthStore().setJWTToken(jwtToken);
+                    useAuthStore().setJWTRefreshToken(jwtRefreshToken);
+                    refreshingToken = false;
+                    //console.log("repeating request:", error);
+                }).catch((error: any) => {
+                    errorRefreshingToken = true;
+                    //console.log("error refreshing tokens !", error);
+                });
+                while (refreshingToken && !errorRefreshingToken) {
+                    //console.log("waiting refresh token..");
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                if (errorRefreshingToken) {
+                    //console.log("error refreshing token !");
+                }
+                else {
+                    //console.log("token refreshed !");
+                    return axios(error.config);
+                }
+            }
+            else
+                Auth.logout();
+        }
+        else {
+            //console.log(error);
+            Auth.logout(); //sloggarsi !
+        }
     }
     /*loggo qualsiasi errore che non sia stato originato dal controller del log, altrimenti
-     si va in loop..*/
-    if (!error.request.responseURL.endsWith('Log/LogInfo')
-        && !error.request.responseURL.endsWith('Log/LogError')) {
+     si va in loop.. e non loggo i 401 dei vari token scaduti*/
+    if (!error.config.url.endsWith('Log/LogInfo')
+        && !error.config.url.endsWith('Log/LogError')
+        && error.response?.status !== 401) {
         Logger.logRESTRequestErrorToServer(error);
     }
+    //console.log("returning promise error !");
     return Promise.reject(error);
 });
 

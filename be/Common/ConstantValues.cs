@@ -1,11 +1,12 @@
-﻿using System.Net;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.Net;
 
 namespace be.Common
 {
     public static class ConstantValues
     {
         public static class Auth
-        {            
+        {
             public const string AuthSettings = "AuthSettings";
             public const string DomainName = "DomainName";
             public const string DomainHost = "DomainHost";
@@ -13,9 +14,17 @@ namespace be.Common
             public const string ConnectionTimeout = "ConnectionTimeout";
             public const string UseSSL = "UseSSL";
             public const string CheckOnAD = "CheckOnAD";
-            public const string Cookie = "Cookie";
-            public const string CookieExpiry = "CookieExpiry";
+            public const string SecurityStampClaimName = "AspNet.Identity.SecurityStamp";
+            public const string JWT = "JWT";
+            public const string JWTIssuer = "Issuer";
+            public const string JWTAudience = "Audience";
+            public const string JWTEncryptionKey = "EncryptionKey";
+            public const string JWTSigningKey = "SigningKey";
+            public const string JWTExpiry = "Expiry";
+            public const string JWTRefreshTokenExpiry = "RefreshTokenExpiry";
+            public const string JWTScheme = "JWTScheme";
             public const string LDAP = "LDAP";
+            public static TokenValidationParameters TokenValidationParameters { get; set; } = new TokenValidationParameters();
             public static class Claims
             {
                 public static class Types

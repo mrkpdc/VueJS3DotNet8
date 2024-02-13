@@ -13,6 +13,10 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using be.Models.AuthModels;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Principal;
 using Novell.Directory.Ldap;
 
 namespace be.Services
@@ -22,22 +26,21 @@ namespace be.Services
         IConfiguration configuration;
         UserManager<User> userManager;
         RoleManager<Role> roleManager;
-        SignInManager<User> signInManager;
         AuthDBContext authDBContext;
         public AuthService(IConfiguration configuration,
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
-            SignInManager<User> signInManager,
             AuthDBContext authDBContext)
         {
             this.configuration = configuration;
             this.userManager = userManager;
             this.roleManager = roleManager;
-            this.signInManager = signInManager;
             this.authDBContext = authDBContext;
         }
 
-        public async Task<(object Result, HttpStatusCode StatusCode)> Login(string userName, string password)
+        public async Task<((List<ClaimModel> Claims, string Token, string RefreshToken)? LoginResult,
+            (object StatusCodeMessage, HttpStatusCode StatusCode) StatusCodeResult)>
+            Login(string userName, string password)
         {
             try
             {
@@ -105,6 +108,7 @@ namespace be.Services
                     {
                     }
                 }
+
                 if (userExistsOnActiveDirectory)
                 {
                     var encryptedUsername = AESEncryptionHelper.EncryptString(userName);
@@ -114,9 +118,10 @@ namespace be.Services
                         .FirstOrDefault();
                     if (ADUser != null)
                     {
-                        var claims = GetAllUserClaims(ADUser.Id);
-                        await signInManager.SignInAsync(ADUser, true);
-                        return (claims, HttpStatusCode.OK);
+                        List<ClaimModel> claims = GetAllUserClaims(ADUser.Id);
+                        string token = GetJWTToken(ADUser, claims);
+                        string refreshToken = GetJWTRefreshToken(ADUser);
+                        return ((claims, token, refreshToken), ConstantValues.ServicesHttpResponses.OK);
                     }
                     else
                     {
@@ -129,16 +134,17 @@ namespace be.Services
                         if (result.Succeeded)
                         {
                             //await userManager.AddToRoleAsync(newADUser, ConstantValues.Roles.User);
-                            var claims = GetAllUserClaims(newADUser.Id);
-                            await signInManager.SignInAsync(newADUser, true);
-                            return (claims, HttpStatusCode.OK);
+                            List<ClaimModel> claims = GetAllUserClaims(newADUser.Id);
+                            string token = GetJWTToken(newADUser, claims);
+                            string refreshToken = GetJWTRefreshToken(newADUser);
+                            return ((claims, token, refreshToken), ConstantValues.ServicesHttpResponses.OK);
                         }
                         else
                         {
                             string toSender = "";
                             foreach (IdentityError error in result.Errors)
                                 toSender += error.Description + "\n";
-                            return ConstantValues.ServicesHttpResponses.InternalServerError;
+                            return (null, ConstantValues.ServicesHttpResponses.InternalServerError);
                         }
                     }
                 }
@@ -150,40 +156,178 @@ namespace be.Services
                         User user = await userManager.FindByNameAsync(encryptedUsername);
                         if (user != null)
                         {
-                            // This doesn't count login failures towards account lockout
-                            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                            SignInResult result = await signInManager.PasswordSignInAsync(encryptedUsername, password, true, lockoutOnFailure: false);
-                            if (result.Succeeded)
+                            var passwordHasher = new PasswordHasher<string>();
+                            var loginResult = passwordHasher
+                                .VerifyHashedPassword(user.UserName == null ? string.Empty : user.UserName,
+                                user.PasswordHash == null ? string.Empty : user.PasswordHash
+                                , password);
+                            /*l'algoritmo di login è cambiato tra login 6 e 8, quindi le vecchie password restituiscono
+                             SuccessRehashNeeded perché bisognerebbe rihasharle con l'algoritmo nuovo, ma è pur sempre
+                             un success.. a quanto pare però, l'8 è retrocompatibile con il 6*/
+                            if (loginResult == PasswordVerificationResult.Success
+                                || loginResult == PasswordVerificationResult.SuccessRehashNeeded)
                             {
-                                var claims = GetAllUserClaims(user.Id);
-                                return (claims, HttpStatusCode.OK);
+                                List<ClaimModel> claims = GetAllUserClaims(user.Id);
+                                string token = GetJWTToken(user, claims);
+                                string refreshToken = GetJWTRefreshToken(user);
+                                return ((claims, token, refreshToken), ConstantValues.ServicesHttpResponses.OK);
                             }
                             else
-                                return ConstantValues.ServicesHttpResponses.LoginFailed;
+                                return (null, ConstantValues.ServicesHttpResponses.LoginFailed);
                         }
                         else
-                            return ConstantValues.ServicesHttpResponses.UserDoesntExist;
+                            return (null, ConstantValues.ServicesHttpResponses.UserDoesntExist);
                     }
                     catch (Exception ex)
                     {
-                        return (ex, HttpStatusCode.InternalServerError);
+                        return (null, (ex, ConstantValues.ServicesHttpResponses.InternalServerError.StatusCode));
                     }
                 }
             }
             catch (Exception ex)
             {
-                return (ex, HttpStatusCode.InternalServerError);
+                return (null, (ex, ConstantValues.ServicesHttpResponses.InternalServerError.StatusCode));
             }
+        }
+
+        public async Task<((List<ClaimModel> Claims, string Token, string RefreshToken) LoginResult,
+            (object StatusCodeMessage, HttpStatusCode StatusCode) StatusCodeResult)>
+            RefreshJWTTokens(string refreshToken)
+        {
+            SecurityToken? validatedToken = null;
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            IPrincipal principal = tokenHandler.ValidateToken(refreshToken, ConstantValues.Auth.TokenValidationParameters, out validatedToken);
+
+            string? userId = ((JwtSecurityToken)validatedToken).Subject;
+            User user = await userManager.FindByIdAsync(userId);
+            List<ClaimModel> claims = GetAllUserClaims(userId);
+            string newToken = GetJWTToken(user, claims);
+            string newRefreshToken = GetJWTRefreshToken(user);
+            return ((claims, newToken, newRefreshToken), ConstantValues.ServicesHttpResponses.OK);
+        }
+
+        private string GetJWTToken(User user, List<ClaimModel> userClaims)
+        {
+            var issuer = configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTIssuer).Value;
+            var audience = configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTAudience).Value;
+            var tokenExpiry = configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTExpiry).Value;
+            var encryptionKey = Encoding.ASCII.GetBytes(configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTEncryptionKey).Value);
+            var signingKey = Encoding.ASCII.GetBytes(configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTSigningKey).Value);
+
+            var encryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(encryptionKey), JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
+
+            /*nel token metto prima dei claim di sistema e user id, poi quelli
+             specifici di ciascun utente*/
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ConstantValues.Auth.SecurityStampClaimName, user.SecurityStamp),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Iss, issuer),
+                new Claim(JwtRegisteredClaimNames.Aud, audience),
+                new Claim(JwtRegisteredClaimNames.Exp, tokenExpiry),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            foreach (ClaimModel claimModel in userClaims)
+                claims.Add(new Claim(claimModel.ClaimType, claimModel.ClaimValue));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                //EncryptingCredentials = new EncryptingCredentials(new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(int.Parse(tokenExpiry)),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(signingKey), SecurityAlgorithms.HmacSha512Signature),
+                EncryptingCredentials = encryptingCredentials
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string tokenString = tokenHandler.WriteToken(token);
+
+            return tokenString;
+        }
+
+        private string GetJWTRefreshToken(User user)
+        {
+            var issuer = configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTIssuer).Value;
+            var audience = configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTAudience).Value;
+            var refreshTokenExpiry = configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTRefreshTokenExpiry).Value;
+            var encryptionKey = Encoding.ASCII.GetBytes(configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTEncryptionKey).Value);
+            var signingKey = Encoding.ASCII.GetBytes(configuration
+                .GetSection(ConstantValues.Auth.AuthSettings)
+                .GetSection(ConstantValues.Auth.JWT)
+                .GetSection(ConstantValues.Auth.JWTSigningKey).Value);
+
+            var encryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(encryptionKey), JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes256CbcHmacSha512);
+
+            /*nel refresh token metto solo i claim di sistema e user id*/
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim(ConstantValues.Auth.SecurityStampClaimName, user.SecurityStamp),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Iss, issuer),
+                new Claim(JwtRegisteredClaimNames.Aud, audience),
+                new Claim(JwtRegisteredClaimNames.Exp, refreshTokenExpiry),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                //EncryptingCredentials = new EncryptingCredentials(new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(int.Parse(refreshTokenExpiry)),
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(signingKey), SecurityAlgorithms.HmacSha512Signature),
+                EncryptingCredentials = encryptingCredentials
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string tokenString = tokenHandler.WriteToken(token);
+
+            return tokenString;
         }
 
         public async Task<(object Result, HttpStatusCode StatusCode)> Logout(ClaimsPrincipal User)
         {
             try
             {
-                if (signInManager.IsSignedIn(User))
-                {
-                    await signInManager.SignOutAsync();
-                }
+                // :)
+                //if (signInManager.IsSignedIn(User))
+                //{
+                //    await signInManager.SignOutAsync();
+                //}
                 return ConstantValues.ServicesHttpResponses.OK;
             }
             catch (Exception ex)

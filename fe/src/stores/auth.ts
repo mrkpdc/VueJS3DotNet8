@@ -34,6 +34,16 @@ export const useAuthStore = defineStore('auth', {
                 return localStorage.getItem("username");
             }
         },
+        getJWTToken(state) {
+            return () => {
+                return localStorage.getItem("JWTToken");
+            }
+        },
+        getJWTRefreshToken(state) {
+            return () => {
+                return localStorage.getItem("JWTRefreshToken");
+            }
+        }
     },
     actions: {
         setClaims(claims: any) {
@@ -47,6 +57,18 @@ export const useAuthStore = defineStore('auth', {
         },
         removeUsername() {
             localStorage.removeItem("username");
+        },
+        setJWTToken(token: string) {
+            localStorage.setItem("JWTToken", token);
+        },
+        removeJWTToken() {
+            localStorage.removeItem("JWTToken");
+        },
+        setJWTRefreshToken(refreshToken: string) {
+            localStorage.setItem("JWTRefreshToken", refreshToken);
+        },
+        removeJWTRefreshToken() {
+            localStorage.removeItem("JWTRefreshToken");
         }
     }
 });

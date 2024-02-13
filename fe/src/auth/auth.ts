@@ -10,8 +10,12 @@ export class Auth {
         };
         axios.post("Auth/Login", body).then((response: any) => {
             var claims = response.data.claims;
+            var jwtToken = response.data.token;
+            var jwtRefreshToken = response.data.refreshToken;
             useAuthStore().setClaims(claims);
             useAuthStore().setUsername(username);
+            useAuthStore().setJWTToken(jwtToken);
+            useAuthStore().setJWTRefreshToken(jwtRefreshToken);
             //router.push('/api');
         })
             .catch((error: any) => {
@@ -20,18 +24,18 @@ export class Auth {
                     callback();
             });
     }
+    static refreshTokens(refreshToken: string) {
+        let body = {
+            refreshToken: refreshToken
+        }
+        return axios.post("Auth/RefreshTokens", body);
+    }
     static logout() {
-        axios.post("Auth/Logout")
-            .then(response => {
-            })
-            .catch(error => {
-            })
-            .then(() => {
-                useAuthStore().removeClaims();
-                useAuthStore().removeUsername();
-                //    if (window && window.location && window.location.hash != '#/')
-                router.push('/');
-            });
+        useAuthStore().removeClaims();
+        useAuthStore().removeUsername();
+        useAuthStore().removeJWTToken();
+        useAuthStore().removeJWTRefreshToken();
+        router.push('/');
     }
     static checkClaim(claimType: string, claimValue?: string) {
         var value = claimValue ? claimValue : 'True';

@@ -5,18 +5,18 @@ using be.DB.Entities.AuthEntities;
 using be.DB.InitialScripts;
 using be.DB.Interceptors;
 using be.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System;
-using System.Threading.Tasks;
+using System.Text;
 using static be.Auth.AuthPolicyManager;
 
 namespace be
@@ -46,7 +46,7 @@ namespace be
 
             /*
                                                 User Management
-            */
+             */
             //sql server
             //builder.Services.AddDbContext<AuthDBContext>(options => options.UseSqlServer(configuration.GetConnectionString("AuthDB_SQLServer"))
             //.AddInterceptors(new DBCommandInterceptor()));
@@ -54,6 +54,7 @@ namespace be
             //postgres
             builder.Services.AddDbContext<AuthDBContext>(options => options.UseNpgsql(configuration.GetConnectionString("AuthDB_Postgres"))
             .AddInterceptors(new DBCommandInterceptor()));
+
 
             builder.Services.AddIdentity<User, Role>(
                 options =>
@@ -69,7 +70,61 @@ namespace be
             builder.Services.AddScoped<UserManager<User>>();
             builder.Services.AddScoped<RoleManager<Role>>();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+            /*
+             //questo da mettere prima di .AddJwtBearer se si vuole usare uno scheme custom..
+             builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = ConstantValues.Auth.JWTScheme;
+                options.DefaultChallengeScheme = ConstantValues.Auth.JWTScheme;
+                options.DefaultScheme = ConstantValues.Auth.JWTScheme;
+            })
+                .AddScheme<AuthenticationSchemeOptions, AuthSchema>("Schema",
+            (options) => { })
+             */
+
+            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidIssuer = builder.Configuration.GetSection(ConstantValues.Auth.AuthSettings).GetSection(ConstantValues.Auth.JWT).GetSection(ConstantValues.Auth.JWTIssuer).Value,
+                ValidAudience = builder.Configuration.GetSection(ConstantValues.Auth.AuthSettings).GetSection(ConstantValues.Auth.JWT).GetSection(ConstantValues.Auth.JWTAudience).Value,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                        builder.Configuration
+                        .GetSection(ConstantValues.Auth.AuthSettings)
+                        .GetSection(ConstantValues.Auth.JWT)
+                        .GetSection(ConstantValues.Auth.JWTSigningKey).Value)
+                    ),
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) =>
+                {
+                    if (validationParameters.ValidateLifetime)
+                    {
+                        if (expires > DateTime.UtcNow)
+                            return true;
+                        else
+                            return false;
+                    }
+                    return true;
+                },
+                ValidateIssuerSigningKey = true,
+                TokenDecryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                        builder.Configuration
+                        .GetSection(ConstantValues.Auth.AuthSettings)
+                        .GetSection(ConstantValues.Auth.JWT)
+                        .GetSection(ConstantValues.Auth.JWTEncryptionKey).Value)
+                    ),
+            };
+            ConstantValues.Auth.TokenValidationParameters = tokenValidationParameters;
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = tokenValidationParameters;
+            });
 
             builder.Services.AddAuthorization(options =>
             {
@@ -78,38 +133,9 @@ namespace be
             });
             builder.Services.AddSingleton<IAuthorizationHandler, AuthPolicyHandler>();
 
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                /*il data protection provider serve per storare le key di criptazione in un path specifico,
-                 altrimenti vengono salvate in un path di default che dipende dal sistema operativo.
-                se le chiavi non sono presenti, vengono generate ogni volta diverse.
-                il path di default delle keys è %LOCALAPPDATA%\ASP.NET\DataProtection-Keys,
-                es: C:\Users\[utente]\AppData\Local\ASP.NET\DataProtection-Keys*/
-                //options.DataProtectionProvider = DataProtectionProvider.Create(new System.IO.DirectoryInfo("C:\\keys"));
-                //NOTA: il cookie viene refreshato automaticamente quando viene usato ed è ancora valido.
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(double.Parse(configuration.GetSection(ConstantValues.Auth.AuthSettings)
-                .GetSection(ConstantValues.Auth.Cookie)
-                .GetSection(ConstantValues.Auth.CookieExpiry).Value));
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.HttpOnly = true;
-                options.Cookie.Name = "VueJS3DotNet8";
-                /*questo serve per evitare il redirect automatico che fa verso "/Account/Login"*/
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    context.RedirectUri = string.Empty;
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                };
-                options.Events.OnRedirectToAccessDenied = context =>
-                {
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                };
-            });
 
             /*
-                                                Application entities
+                                               Application entities
             */
             //sql server
             //builder.Services.AddDbContext<DBContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbContext_SQLServer"))

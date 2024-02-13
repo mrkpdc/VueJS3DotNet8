@@ -31,7 +31,13 @@ namespace be.Auth
                 if (httpContext.User.CheckPolicy(requirement.Claim))
                     context.Succeed(requirement);
                 else
+                {
+                    httpContext.Response.StatusCode = 401;
+                    //httpContext.Response.WriteAsync(string.Empty);
+                    /*questo completeAsync funziona in debug ma non in release :) GG microsoft*/
+                    //httpContext.Response.CompleteAsync();
                     context.Fail();
+                }
                 return Task.FromResult(0);
             }
         }
