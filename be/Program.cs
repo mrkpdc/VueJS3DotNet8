@@ -4,6 +4,7 @@ using be.DB.Contexts;
 using be.DB.Entities.AuthEntities;
 using be.DB.InitialScripts;
 using be.DB.Interceptors;
+using be.Hubs;
 using be.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -157,6 +158,7 @@ namespace be
                 .AllowCredentials();
             }));
 
+            builder.Services.AddSignalR();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -190,6 +192,8 @@ namespace be
             app.UseMiddleware<AuthMiddleware>();
 
             app.MapControllers();
+
+            app.MapHub<SignalRHub>("api/signalRHub");
 
             app.Run();
         }

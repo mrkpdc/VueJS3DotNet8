@@ -25,6 +25,15 @@ const router = createRouter({
             component: () => import('@/views/APIView.vue')
         },
         {
+            path: '/signalr',
+            name: 'signalr',
+            meta: {
+                requiresAuth: true,
+                requiredClaim: constantValues.authClaims.CanRegisterToSignalR
+            },
+            component: () => import('@/views/SignalR.vue')
+        },
+        {
             path: '/auth/users',
             name: 'users',
             meta: {
