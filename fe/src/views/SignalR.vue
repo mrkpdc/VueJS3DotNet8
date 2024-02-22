@@ -66,15 +66,17 @@
 
     //questo � per salvare il connectionId nel localstorage
     import { useSignalRStore } from '@/stores/signalr';
+    import { useAuthStore } from '@/stores/auth';
 
     var pageIsLoading = ref(false);
 
     const signalRStore = useSignalRStore();
+    const authStore = useAuthStore();
 
     var initialSignalRConnectionInterval: number = 0;
     var signalRConnection = new signalR.HubConnectionBuilder()
         .withUrl(constantValues.backendUrl + "signalRHub"
-            , { accessTokenFactory: () => signalRStore.getJWTToken() }
+            , { accessTokenFactory: () => authStore.getJWTToken() as string }
             //, {
             //  httpClient: new CustomHTTPClient(new CustomLogger()),
             //  //  logMessageContent: true
@@ -174,7 +176,7 @@
             if (error.message.toLowerCase().includes("unauthorized")
                 || error.message.includes("401")) {
 
-                    
+
 
                 //this.authService.tryRefreshToken()
                 //    .pipe(takeUntil(this.subscriptions))
