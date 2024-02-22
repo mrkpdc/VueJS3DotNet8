@@ -197,8 +197,11 @@
                         //console.log("error refreshing tokens !", error);
                     });
                 }
-                else
+                else {
+                    signalRConnection.stop();
+                    clearInterval(initialSignalRConnectionInterval);
                     Auth.logout();
+                }
                 //this.authService.tryRefreshToken()
                 //    .pipe(takeUntil(this.subscriptions))
                 //    .subscribe({
