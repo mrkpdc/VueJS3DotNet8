@@ -175,9 +175,30 @@
             */
             if (error.message.toLowerCase().includes("unauthorized")
                 || error.message.includes("401")) {
+                //console.log("signalr error !");
 
+                const refreshToken = useAuthStore().getJWTRefreshToken();
+                if (refreshToken) {
+                    let refreshingToken = true;
+                    let errorRefreshingToken = false;
 
+                    Auth.refreshTokens(refreshToken).then((response: any) => {
+                        var claims = response.data.claims;
+                        var jwtToken = response.data.token;
+                        var jwtRefreshToken = response.data.refreshToken;
 
+                        useAuthStore().setClaims(claims);
+                        useAuthStore().setJWTToken(jwtToken);
+                        useAuthStore().setJWTRefreshToken(jwtRefreshToken);
+                        refreshingToken = false;
+                        //console.log("repeating request:", error);
+                    }).catch((error: any) => {
+                        errorRefreshingToken = true;
+                        //console.log("error refreshing tokens !", error);
+                    });
+                }
+                else
+                    Auth.logout();
                 //this.authService.tryRefreshToken()
                 //    .pipe(takeUntil(this.subscriptions))
                 //    .subscribe({
