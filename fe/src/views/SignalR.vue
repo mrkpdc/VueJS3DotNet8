@@ -202,28 +202,6 @@
                     clearInterval(initialSignalRConnectionInterval);
                     Auth.logout();
                 }
-                //this.authService.tryRefreshToken()
-                //    .pipe(takeUntil(this.subscriptions))
-                //    .subscribe({
-                //        next: (result => {
-                //            if (result != undefined) {
-                //                if (result.token != undefined)
-                //                    this.stateService.setJWTToken(result.token);
-                //                if (result.refreshToken != undefined)
-                //                    this.stateService.setJWTRefreshToken(result.refreshToken);
-                //                if (result.claims != undefined)
-                //                    this.stateService.setClaims(result.claims);
-                //                //console.log("refreshed !");
-                //            }
-                //        }),
-                //        error: (error => {
-                //            //console.log("failed refresh !");
-                //            signalRConnection.stop();
-                //            clearInterval(initialSignalRConnectionInterval);
-                //            Auth.logout();
-                //        })
-                //    });
-
             }
         }
     }
