@@ -2,12 +2,13 @@
 {
     public class LogModel
     {
-        public string[]? Additional { get; set; }
-        public int? ColumnNumber { get; set; }
-        public string? FileName { get; set; }
-        public int? Level { get; set; }
-        public int? LineNumber { get; set; }
-        public string? Message { get; set; }
-        public string? TimeStamp { get; set; }
+        public string? ErrorName { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? ErrorStackTrace { get; set; }
+        public object? Instance { get; set; }
+        public string? Info { get; set; }
+        public string? RequestURL { get; set; }
+        public string? ResponseResult { get; set; }
+        public int? ResponseStatus { get; set; }
     }
 }
