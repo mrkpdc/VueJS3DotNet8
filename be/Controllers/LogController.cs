@@ -21,21 +21,51 @@ namespace be.Controllers
             this.configuration = configuration;
             this.logger = logger;
         }
-        [HttpPost("Log")]
-        public async Task<object> Log([FromBody] LogModel model,
-            [FromServices] AuthService authService)
+        [HttpPost("LogInfo")]
+        public async Task<object> LogInfo([FromBody] LogModel model)
         {
             try
             {
-                this.logger.Log(LogLevel.Error,
-                    "Timestamp: " + model.TimeStamp
-                    + " FileName: " + model.FileName
-                    + " LineNumber: " + model.LineNumber
-                    + " ColumnNumber: " + model.ColumnNumber
-                    + " Message: " + model.Message
-                    + " Level: " + model.Level
-                    + " Additional: " + model.Additional);
-                System.Diagnostics.Debug.WriteLine(model.Message);
+                var log = string.Empty;
+                if (!string.IsNullOrEmpty(model.Info))
+                    log += " Info: " + model.Info + Environment.NewLine;
+
+                this.logger.Log(LogLevel.Information, log);
+                System.Diagnostics.Debug.WriteLine(log);
+                return 200;
+            }
+            catch (Exception ex)
+            {
+                this.logger.Log(LogLevel.Error, ex, string.Empty);
+                Response.StatusCode = (int)ConstantValues.ServicesHttpResponses.InternalServerError.StatusCode;
+                return ConstantValues.ServicesHttpResponses.InternalServerError.Result;
+            }
+        }
+        [HttpPost("LogError")]
+        public async Task<object> LogError([FromBody] LogModel model)
+        {
+            try
+            {
+                var log = string.Empty;
+                if (!string.IsNullOrEmpty(model.ErrorName))
+                    log += "ErrorName: " + model.ErrorName + Environment.NewLine;
+                if (!string.IsNullOrEmpty(model.ErrorMessage))
+                    log += " ErrorMessage: " + model.ErrorMessage + Environment.NewLine;
+                if (!string.IsNullOrEmpty(model.ErrorStackTrace))
+                    log += " ErrorStackTrace: " + model.ErrorStackTrace + Environment.NewLine;
+                if (model.Instance != null)
+                    log += " Instance: " + model.Instance + Environment.NewLine;
+                if (!string.IsNullOrEmpty(model.Info))
+                    log += " Info: " + model.Info + Environment.NewLine;
+                if (!string.IsNullOrEmpty(model.RequestURL))
+                    log += " RequestURL: " + model.RequestURL + Environment.NewLine;
+                if (model.ResponseStatus != null)
+                    log += " ResponseStatus: " + model.ResponseStatus + Environment.NewLine;
+                if (!string.IsNullOrEmpty(model.ResponseResult))
+                    log += " ResponseResult: " + model.ResponseResult + Environment.NewLine;
+
+                this.logger.Log(LogLevel.Error, log);
+                System.Diagnostics.Debug.WriteLine(log);
                 return 200;
             }
             catch (Exception ex)
