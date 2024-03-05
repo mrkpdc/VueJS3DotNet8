@@ -9,7 +9,7 @@ docker desktop:
 	- avviare il progetto
 	
 	
-build visual studio image:
+build visual studio image: 
 	- se si fa play in visual studio lui si builda una sua immagine, ma poi non ci si possono
 	creare containers da docker desktop, quindi per creare un'immagine da cui creare containers
 	bisogna buildarla tramite la cli di docker
