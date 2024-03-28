@@ -38,6 +38,7 @@ import '@/style/bootstrapOverrides.scss';
  viene caricato per ultimo per eventualmente sovrascrivere
  anche i settaggi di default di bootstrap*/
 import '@/style/globalStyle.scss';
+import { SignalR } from './signalr/signalr';
 
 
 axios.defaults.withCredentials = true;
@@ -104,3 +105,7 @@ app.use(i18n);
 app.use(router);
 app.use(naive);
 app.mount('#app');
+
+
+console.log("building signalr");
+SignalR.startSignalR();

@@ -24,14 +24,26 @@
                                             <li><a class="dropdown-item" href="#" v-on:click="setLanguage('it', itIT, dateItIT)">{{$t('italian')}}</a></li>
                                         </ul>
                                     </div>
-                                </form>
+                                    <div class="notificationBell" v-on:click="notificationsBarIsOpen = true">
+                                        <div v-if="!notificationsBarIsOpen">
+                                            <n-icon size="24" color="white">
+                                                <Alert20Regular />
+                                            </n-icon>
+                                        </div>
+                                        <div v-if="notificationsBarIsOpen">
+                                            <n-icon size="24" color="white">
+                                                <Alert20Filled />
+                                            </n-icon>
+                                        </div>
+                                    </div>
+                                </form>                               
                             </div>
                         </n-el>
                         <n-drawer v-model:show="navBarIsOpen" :placement="'left'">
                             <!--<n-drawer-content :title="$t('applicationTitle')">-->
                             <n-drawer-content :body-content-style="{'padding':'0'}">
                                 <!--questo è un n-el per applicare lo stile con var() nel css, altrimenti in un div
-                        normale non lo mette-->
+            normale non lo mette-->
                                 <n-el tag="div" class="navigationContainer layoutBGColor baseTextColor text-center">
                                     <h3 class="baseTextColor mt-3">{{$t('applicationTitle')}}</h3>
                                     <div class="navigationContent mt-5">
@@ -115,6 +127,18 @@
                                 </n-el>
                             </n-drawer-content>
                         </n-drawer>
+                        <n-drawer v-model:show="notificationsBarIsOpen" :placement="'right'">
+                            <n-drawer-content :body-content-style="{'padding':'0'}">
+                                <n-el tag="div" class="navigationContainer layoutBGColor baseTextColor text-center">
+                                    <h3 class="baseTextColor mt-3">{{$t('applicationTitle')}}</h3>
+                                    <div class="notificationsContent mt-5">
+                                        <div class="notificationItem">
+                                           
+                                        </div>
+                                    </div>
+                                </n-el>
+                            </n-drawer-content>
+                        </n-drawer>
                     </div>
                 </header>
                 <router-view />
@@ -179,6 +203,11 @@
         cursor: pointer;
     }
 
+    .notificationBell{
+        padding-left:20px;
+        padding-right:20px;
+    }
+
     </style>
 
 <script setup lang="ts">
@@ -186,6 +215,9 @@
     import { Auth } from '@/auth/auth';
     //questo è necessario per lo stile di naive
     import { NConfigProvider, NThemeEditor, darkTheme, lightTheme } from 'naive-ui';
+
+    import Alert20Regular from '@vicons/fluent/Alert20Regular';
+    import Alert20Filled from '@vicons/fluent/Alert20Filled';
 
     //questo è per salvare il locale nel localstorage
     import { useLanguageAndLocaleStore } from '@/stores/languageAndLocale';
@@ -200,6 +232,7 @@
     /*queste sono le variabili globali del css per applicarle
      sotto al themeOverrides di modo che abbiano effetto in tutta l'applicazione*/
     import variables from "@/style/globalVariables.module.scss";
+    import { SignalR } from './signalr/signalr';
 
     /*fa l'override del tema generico di naive con le variabili nel globalVariables.module.scss.
      gli si possono anche scrivere direttamente i valori, tipo 'black' o esadecimali*/
@@ -265,4 +298,9 @@
         }
     )
     //</isLoggedIn>
+
+    //<notifications>
+    var hasNotifications = ref(false);
+    var notificationsBarIsOpen = ref(false);
+    //</notifications>
 </script>
