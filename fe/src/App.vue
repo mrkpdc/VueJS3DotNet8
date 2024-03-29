@@ -380,7 +380,7 @@
     //<notifications>
     var hasNotifications = ref(false);
     var notificationsBarIsOpen = ref(false);
-    var notifications = ref([]);
+    var notifications = ref<any[]>([]);
     const notificationsStoreSubscription = useNotificationsStore().$onAction(
         ({
             name, // name of the action
