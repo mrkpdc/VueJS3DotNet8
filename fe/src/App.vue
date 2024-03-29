@@ -350,7 +350,9 @@
                 if (name == 'removeUsername') {
                     isLoggedIn.value = false;
                     /*se l'utente è stato sloggato spengo anche il websocket e chiudo la
-                    barra delle notifiche*/
+                    barra delle notifiche. non chiamo la CloseNotificationsBar perché quella
+                    chiama anche la setUnreadNotificationsAsRead, che ovviamente non posso
+                    raggiungere perché sono sloggato*/
                     SignalR.stopSignalR();
                     notificationsBarIsOpen.value = false;
                 }
@@ -410,11 +412,12 @@
         notificationsBarIsOpen.value = true;
         getNotifications();
     }
+    /*questa è la close con l'evento della notificationsBar, che setta
+    anche come lette le notifiche*/
     function closeNotificationsBar() {
         notificationsBarIsOpen.value = false;
         useNotificationsStore().setHasNotifications(false);
         setUnreadNotificationsAsRead();
-        getNotifications();
     }
     function getNotifications() {
         Api.getNotifications().then((response: any) => {
@@ -434,6 +437,7 @@
     }
     function setUnreadNotificationsAsRead() {
         Api.setUnreadNotificationsAsRead().then((response: any) => {
+
         }).catch((error: any) => {
             console.log(error);
         }).then(() => {
