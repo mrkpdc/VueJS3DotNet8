@@ -3,14 +3,25 @@ import { Auth } from '@/auth/auth';
 import constantValues from '@/common/constantValues';
 //questo è per salvare il connectionId nel localstorage
 import { useSignalRStore } from '@/stores/signalr';
+import { useNotificationsStore } from '@/stores/notifications';
+import { useMessage } from 'naive-ui';
+import { Api } from '@/api/api';
+import { useI18n } from 'vue-i18n';
 
 export class SignalR {
     private static initialSignalRConnectionInterval: number = 0;
     private static signalRConnection: any = null;
     private static signalRStore: any = null;
+    private static notificationsStore: any = null;
+    //private static message: any = null;
+    //private static t: any = null;
 
     static startSignalR() {
         this.signalRStore = useSignalRStore();
+        this.notificationsStore = useNotificationsStore();
+        //this.message = useMessage();
+        //this.t = useI18n();
+
         //console.log("signalrconnection", this.signalRConnection);
         if (!this.signalRConnection) {
             //this.stateService.getConfig()
@@ -71,11 +82,14 @@ export class SignalR {
                     .then((result: any) => {
                         //console.log(result);
                         this.signalRStore.setCachedSignalRConnectionId(this.signalRConnection.connectionId);
+                        /*va a prendere eventuali notifiche che sono arrivate nel frattempo*/
+                        //this.getNotifications();
                     });
             });
 
             this.signalRConnection.on("ReceiveMessage", async (data: any) => {
                 console.log("Received message from SignalR:", data);
+                this.notificationsStore.setHasNotifications(true);
             });
         }
         if (this.signalRConnection)
@@ -97,7 +111,9 @@ export class SignalR {
                             .then((result: any) => {
                                 //console.log(result);
                                 this.signalRStore.setCachedSignalRConnectionId(this.signalRConnection.connectionId);
-                            });;
+                                /*va a prendere le notifiche iniziali*/
+                                //this.getNotifications();
+                            });
                     }).catch((error: any) => {
                         console.log("start", error);
                         this.handleSignalRError(error);
@@ -121,7 +137,6 @@ export class SignalR {
         }
     }
 
-
     static stopSignalR() {
         if (this.signalRConnection) {
             //console.log("stopping connection !");
@@ -131,5 +146,16 @@ export class SignalR {
         //console.log("clearing interval !");
         clearInterval(this.initialSignalRConnectionInterval);
         //}
+    }
+
+    private static getNotifications() {
+        Api.getNotifications().then((response: any) => {
+            console.log(response);
+            if (response.data.notifications.length > 0)
+                this.notificationsStore.setHasNotifications(true);
+        }).catch((error: any) => {
+            //this.message.error(this.t('error'));
+        }).then(() => {
+        });
     }
 }

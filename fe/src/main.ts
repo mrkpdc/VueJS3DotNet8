@@ -105,7 +105,3 @@ app.use(i18n);
 app.use(router);
 app.use(naive);
 app.mount('#app');
-
-
-console.log("building signalr");
-SignalR.startSignalR();
