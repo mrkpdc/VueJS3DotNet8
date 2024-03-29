@@ -24,7 +24,7 @@
                                             <li><a class="dropdown-item" href="#" v-on:click="setLanguage('it', itIT, dateItIT)">{{$t('italian')}}</a></li>
                                         </ul>
                                     </div>
-                                    <div v-if="isLoggedIn" class="notificationBell" v-on:click="openNotificationsBar()">
+                                    <div v-if="isLoggedIn && Auth.checkClaim('CanUseNotifications')" class="notificationBell" v-on:click="openNotificationsBar()">
                                         <div v-if="!hasNotifications">
                                             <n-icon size="24" color="white">
                                                 <Alert20Regular />
@@ -296,6 +296,7 @@
      sotto al themeOverrides di modo che abbiano effetto in tutta l'applicazione*/
     import variables from "@/style/globalVariables.module.scss";
     import { useSignalRStore } from './stores/signalr';
+    import constantValues from './common/constantValues';
 
     /*fa l'override del tema generico di naive con le variabili nel globalVariables.module.scss.
      gli si possono anche scrivere direttamente i valori, tipo 'black' o esadecimali*/
@@ -313,7 +314,7 @@
     onMounted(() => {
         var languageAndLocale = languageAndLocaleStore.LanguageAndLocale;
         setLanguage(languageAndLocale.language, languageAndLocale.locale, languageAndLocale.dateLocale);
-        if (isLoggedIn.value) {
+        if (isLoggedIn.value && Auth.checkClaim(constantValues.authClaims.CanRegisterToSignalR)) {
             /*solo se l'utente è loggato, facciamo anche partire la connessione iniziale a signalR,
             che quando si connetterà farà anche la prima getNotifications*/
             SignalR.startSignalR();
@@ -366,7 +367,8 @@
                 else if (name == 'setUsername') {
                     isLoggedIn.value = true;
                     /*se l'utente si è appena loggato connetto il websocket*/
-                    SignalR.startSignalR();
+                    if (Auth.checkClaim(constantValues.authClaims.CanRegisterToSignalR))
+                        SignalR.startSignalR();
                 }
             })
             onError((error) => {
