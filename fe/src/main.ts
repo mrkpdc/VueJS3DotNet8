@@ -38,8 +38,6 @@ import '@/style/bootstrapOverrides.scss';
  viene caricato per ultimo per eventualmente sovrascrivere
  anche i settaggi di default di bootstrap*/
 import '@/style/globalStyle.scss';
-import { SignalR } from './signalr/signalr';
-
 
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(function (request) {

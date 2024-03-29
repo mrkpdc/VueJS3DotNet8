@@ -143,7 +143,9 @@
                                     </n-grid>
                                     <div class="notificationsContent p-2 text-start">
                                         <div v-if="notifications.length > 0">
-                                            <n-grid cols="24" responsive="screen" v-for="notification in notifications" class="mt-3">
+                                            <n-grid cols="24" responsive="screen" v-for="notification in notifications"
+                                                    class="mt-3"
+                                                    :class="{ unreadNotification: !notification.readDate}">
                                                 <n-grid-item span="24">
                                                     <n-grid cols="24">
                                                         <n-grid-item span="22">id: {{notification.id}}</n-grid-item>
@@ -255,7 +257,8 @@
         flex-direction: column;
     }
 
-    .notificationsItem {
+    .unreadNotification {
+        font-weight: bold;
     }
 
     </style>
@@ -310,7 +313,11 @@
     onMounted(() => {
         var languageAndLocale = languageAndLocaleStore.LanguageAndLocale;
         setLanguage(languageAndLocale.language, languageAndLocale.locale, languageAndLocale.dateLocale);
-
+        if (isLoggedIn.value) {
+            /*solo se l'utente è loggato, facciamo anche partire la connessione iniziale a signalR,
+            che quando si connetterà farà anche la prima getNotifications*/
+            SignalR.startSignalR();
+        }
     });
 
     //<languages>
@@ -358,8 +365,7 @@
                 }
                 else if (name == 'setUsername') {
                     isLoggedIn.value = true;
-                    /*facciamo anche partire la connessione iniziale a signalR,
-                    che quando si connetterà farà anche la prima getNotifications*/
+                    /*se l'utente si è appena loggato connetto il websocket*/
                     SignalR.startSignalR();
                 }
             })
