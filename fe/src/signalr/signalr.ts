@@ -73,30 +73,32 @@ export class SignalR {
     }
 
     private static connectSignalR() {
-        this.initialSignalRConnectionInterval = setInterval(
-            async () => {
-                if (this.signalRConnection.state === signalR.HubConnectionState.Disconnected) {
-                    console.log("trying initial connection..");
-                    await this.signalRConnection.start().then(() => {
-                        console.log("SignalR connected");
+        let signalRConnectionFunction = async () => {
+            if (this.signalRConnection.state === signalR.HubConnectionState.Disconnected) {
+                console.log("trying initial connection..");
+                await this.signalRConnection.start().then(() => {
+                    console.log("SignalR connected");
 
-                        if (this.signalRStore.getCachedSignalRConnectionId() == '')
+                    if (this.signalRStore.getCachedSignalRConnectionId() == '')
+                        this.signalRStore.setCachedSignalRConnectionId(this.signalRConnection.connectionId);
+
+                    this.signalRConnection.invoke("RegisterClientConnection", this.signalRStore.getCachedSignalRConnectionId())
+                        .then((result: any) => {
+                            //console.log(result);
                             this.signalRStore.setCachedSignalRConnectionId(this.signalRConnection.connectionId);
-
-                        this.signalRConnection.invoke("RegisterClientConnection", this.signalRStore.getCachedSignalRConnectionId())
-                            .then((result: any) => {
-                                //console.log(result);
-                                this.signalRStore.setCachedSignalRConnectionId(this.signalRConnection.connectionId);
-                            });
-                    }).catch((error: any) => {
-                        console.log("start", error);
-                        this.handleSignalRError(error);
-                    });
-                }
-                else {
-                    clearInterval(this.initialSignalRConnectionInterval);
-                }
-            }, 5000);
+                        });
+                }).catch((error: any) => {
+                    console.log("start", error);
+                    this.handleSignalRError(error);
+                });
+            }
+            else {
+                console.log("clear interval !");
+                clearInterval(this.initialSignalRConnectionInterval);
+            }
+        };
+        signalRConnectionFunction();
+        this.initialSignalRConnectionInterval = setInterval(signalRConnectionFunction, 5000);
     }
 
     private static handleSignalRError(error: Error | undefined) {

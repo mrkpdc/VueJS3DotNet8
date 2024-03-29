@@ -429,7 +429,6 @@
     }
     function getNotifications() {
         Api.getNotifications().then((response: any) => {
-            console.log(response);
             notifications.value = response.data.notifications;
             for (let i = 0; i < response.data.notifications.length; i++) {
                 if (!response.data.notifications[i].readDate) {
