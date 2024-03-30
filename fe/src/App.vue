@@ -240,6 +240,7 @@
     .navigationFooter {
         height: 30%;
         margin-top: auto;
+        margin-bottom: 30%;
     }
 
     .cursorPointer {
