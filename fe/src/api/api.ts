@@ -30,4 +30,18 @@ export class Api {
         return axios.post('SignalR/SendMessageToUser', body);
     }
     //</signalr>
+    //<notifications>
+    static getNotifications() {
+        return axios.get('Notifications/GetNotifications');
+    }
+    static setUnreadNotificationsAsRead() {
+        return axios.post('Notifications/SetUnreadNotificationsAsRead', {});
+    }
+    static deleteNotification(notificationId: string) {
+        let body = {
+            Id: notificationId
+        };
+        return axios.post('Notifications/DeleteNotification', body);
+    }
+    //</notifications>
 }
