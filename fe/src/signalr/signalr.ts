@@ -78,7 +78,6 @@ export class SignalR {
 
     private static connectSignalR() {
         let signalRConnectionFunction = async () => {
-            console.log("new instance !");
             if (this.signalRConnection.state === signalR.HubConnectionState.Disconnected) {
                 console.log("trying initial connection..");
                 await this.signalRConnection.start().then(() => {
