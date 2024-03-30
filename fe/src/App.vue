@@ -204,7 +204,7 @@
 
     .navigationContainer {
         display: flex;
-        height: 100%;
+        min-height: 100%;
         flex-direction: column;
     }
 
@@ -240,6 +240,7 @@
     .navigationFooter {
         height: 30%;
         margin-top: auto;
+        margin-bottom: 30%;
     }
 
     .cursorPointer {
