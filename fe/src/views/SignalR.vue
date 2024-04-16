@@ -64,7 +64,7 @@
     import constantValues from '@/common/constantValues';
     import * as signalR from '@microsoft/signalr';
 
-    //questo è per salvare il connectionId nel localstorage
+    //questo Ã¨ per salvare il connectionId nel localstorage
     import { useSignalRStore } from '@/stores/signalr';
 
     var pageIsLoading = ref(false);
@@ -96,7 +96,7 @@
         startSignalR();
     });
 
-    /*onUnmounted non cancella l'interval, forse perché è troppo tardi,
+    /*onUnmounted non cancella l'interval, forse perchÃ© Ã¨ troppo tardi,
     mentre questo ci riesce*/
     onBeforeUnmount(() => {
         signalRConnection.stop();

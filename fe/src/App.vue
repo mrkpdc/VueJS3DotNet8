@@ -30,7 +30,7 @@
                         <n-drawer v-model:show="navBarIsOpen" :placement="'left'">
                             <!--<n-drawer-content :title="$t('applicationTitle')">-->
                             <n-drawer-content :body-content-style="{'padding':'0'}">
-                                <!--questo Ë un n-el per applicare lo stile con var() nel css, altrimenti in un div
+                                <!--questo ÔøΩ un n-el per applicare lo stile con var() nel css, altrimenti in un div
                         normale non lo mette-->
                                 <n-el tag="div" class="navigationContainer layoutBGColor baseTextColor text-center">
                                     <h3 class="baseTextColor mt-3">{{$t('applicationTitle')}}</h3>
@@ -184,13 +184,13 @@
 <script setup lang="ts">
     import { getCurrentInstance, onMounted, ref } from 'vue';
     import { Auth } from '@/auth/auth';
-    //questo Ë necessario per lo stile di naive
+    //questo √® necessario per lo stile di naive
     import { NConfigProvider, NThemeEditor, darkTheme, lightTheme } from 'naive-ui';
 
-    //questo Ë per salvare il locale nel localstorage
+    //questo √® per salvare il locale nel localstorage
     import { useLanguageAndLocaleStore } from '@/stores/languageAndLocale';
 
-    //questo Ë usato sopra per far vedere lo username dell'utente loggato
+    //questo √® usato sopra per far vedere lo username dell'utente loggato
     import { useAuthStore } from '@/stores/auth';
 
     //questi sono per la localizzazione dei component di naiveui
@@ -228,8 +228,8 @@
 
     /*lo store mi serve per salvare la lingua nel localstorage*/
     const languageAndLocaleStore = useLanguageAndLocaleStore();
-    /*si cambia la lingua dell'i18n accedendo alla propriet‡ globale della currentInstance
-    di vue. getCurrentInstance() si puÚ fare solo fuori da una funzione o in un lifecycle hook,
+    /*si cambia la lingua dell'i18n accedendo alla propriet√† globale della currentInstance
+    di vue. getCurrentInstance() si pu√≤ fare solo fuori da una funzione o in un lifecycle hook,
     non in una funzione normale*/
     var currentInstance = getCurrentInstance();
     function setLanguage(languageKey: string, locale: any, dateLocale: any) {
@@ -243,7 +243,7 @@
 
     //<isLoggedIn>
     var isLoggedIn = ref(Auth.isLoggedIn());
-    /*questo serve per prendere se l'utente Ë loggato*/
+    /*questo serve per prendere se l'utente √® loggato*/
     const unsubscribe = useAuthStore().$onAction(
         ({
             name, // name of the action
