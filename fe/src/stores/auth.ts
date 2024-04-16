@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', {
     },
     getters: {
         /*i return di funzioni in getClaims e getUsername bypassano il bisogno
-         di avere properties nello state. in questo caso va bene perché non c'è neanche
+         di avere properties nello state. in questo caso va bene perchÃ© non c'Ã¨ neanche
          bisogno di osservare lo state*/
         getClaims(state) {
             //return state.claims;
