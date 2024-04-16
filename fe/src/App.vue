@@ -42,7 +42,7 @@
                         <n-drawer v-model:show="navBarIsOpen" :placement="'left'">
                             <!--<n-drawer-content :title="$t('applicationTitle')">-->
                             <n-drawer-content :body-content-style="{'padding':'0'}">
-                                <!--questo Ë un n-el per applicare lo stile con var() nel css, altrimenti in un div
+                                <!--questo √® un n-el per applicare lo stile con var() nel css, altrimenti in un div
             normale non lo mette-->
                                 <n-el tag="div" class="navigationContainer layoutBGColor baseTextColor text-center">
                                     <h3 class="baseTextColor mt-3">{{$t('applicationTitle')}}</h3>
@@ -269,7 +269,7 @@
     import { Auth } from '@/auth/auth';
     import { Api } from '@/api/api';
 
-    //questo Ë necessario per lo stile di naive
+    //questo √® necessario per lo stile di naive
     import { NConfigProvider, NThemeEditor, darkTheme, lightTheme } from 'naive-ui';
 
     import Alert20Regular from '@vicons/fluent/Alert20Regular';
@@ -277,10 +277,10 @@
     import Delete20Filled from '@vicons/fluent/Delete20Filled';
     import Dismiss20Filled from '@vicons/fluent/Dismiss20Filled';
 
-    //questo Ë per salvare il locale nel localstorage
+    //questo √® per salvare il locale nel localstorage
     import { useLanguageAndLocaleStore } from '@/stores/languageAndLocale';
 
-    //questo Ë usato sopra per far vedere lo username dell'utente loggato
+    //questo √® usato sopra per far vedere lo username dell'utente loggato
     import { useAuthStore } from '@/stores/auth';
 
     //questo serve per la connessione a signalR, che viene fatta nell onmounted
@@ -316,8 +316,8 @@
         var languageAndLocale = languageAndLocaleStore.LanguageAndLocale;
         setLanguage(languageAndLocale.language, languageAndLocale.locale, languageAndLocale.dateLocale);
         if (isLoggedIn.value && Auth.checkClaim(constantValues.authClaims.CanRegisterToSignalR)) {
-            /*solo se l'utente Ë loggato, facciamo anche partire la connessione iniziale a signalR,
-            che quando si connetter‡ far‡ anche la prima getNotifications*/
+            /*solo se l'utente √® loggato, facciamo anche partire la connessione iniziale a signalR,
+            che quando si connetter√† far√† anche la prima getNotifications*/
             SignalR.startSignalR();
         }
     });
@@ -331,8 +331,8 @@
 
     /*lo store mi serve per salvare la lingua nel localstorage*/
     const languageAndLocaleStore = useLanguageAndLocaleStore();
-    /*si cambia la lingua dell'i18n accedendo alla propriet‡ globale della currentInstance
-    di vue. getCurrentInstance() si puÚ fare solo fuori da una funzione o in un lifecycle hook,
+    /*si cambia la lingua dell'i18n accedendo alla propriet√† globale della currentInstance
+    di vue. getCurrentInstance() si pu√≤ fare solo fuori da una funzione o in un lifecycle hook,
     non in una funzione normale*/
     var currentInstance = getCurrentInstance();
     function setLanguage(languageKey: string, locale: any, dateLocale: any) {
@@ -346,7 +346,7 @@
 
     //<isLoggedIn>
     var isLoggedIn = ref(Auth.isLoggedIn());
-    /*questo serve per prendere se l'utente Ë loggato*/
+    /*questo serve per prendere se l'utente √® loggato*/
     const authStoreSubscription = useAuthStore().$onAction(
         ({
             name, // name of the action
@@ -358,16 +358,16 @@
             after((result) => {
                 if (name == 'removeUsername') {
                     isLoggedIn.value = false;
-                    /*se l'utente Ë stato sloggato spengo anche il websocket e chiudo la
-                    barra delle notifiche. non chiamo la CloseNotificationsBar perchÈ quella
+                    /*se l'utente √® stato sloggato spengo anche il websocket e chiudo la
+                    barra delle notifiche. non chiamo la CloseNotificationsBar perch√© quella
                     chiama anche la setUnreadNotificationsAsRead, che ovviamente non posso
-                    raggiungere perchÈ sono sloggato*/
+                    raggiungere perch√© sono sloggato*/
                     SignalR.stopSignalR();
                     notificationsBarIsOpen.value = false;
                 }
                 else if (name == 'setUsername') {
                     isLoggedIn.value = true;
-                    /*se l'utente si Ë appena loggato connetto il websocket*/
+                    /*se l'utente si √® appena loggato connetto il websocket*/
                     if (Auth.checkClaim(constantValues.authClaims.CanRegisterToSignalR))
                         SignalR.startSignalR();
                 }
@@ -392,7 +392,7 @@
         }) => {
             after((result) => {
                 if (name == 'setHasNotifications') {
-                    //il valore settato nello store Ë sotto args
+                    //il valore settato nello store √® sotto args
                     hasNotifications.value = args[0];
                 }
             })
@@ -421,7 +421,7 @@
         notificationsBarIsOpen.value = true;
         getNotifications();
     }
-    /*questa Ë la close con l'evento della notificationsBar, che setta
+    /*questa √® la close con l'evento della notificationsBar, che setta
     anche come lette le notifiche*/
     function closeNotificationsBar() {
         notificationsBarIsOpen.value = false;
