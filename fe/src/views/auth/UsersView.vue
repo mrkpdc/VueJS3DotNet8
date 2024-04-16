@@ -283,7 +283,7 @@
     var existingClaimsFiltered = ref<any>([]);
     var existingClaims = ref<any[]>([]);
     var existingClaimsColumns = getExistingClaimsColumns();
-    /*questo watch è necessario per ricaricare le traduzioni di title delle colonne,
+    /*questo watch Ã¨ necessario per ricaricare le traduzioni di title delle colonne,
      altrimenti restano sempre le stesse*/
     watch(locale, () => {
         existingClaimsColumns = getExistingClaimsColumns();
@@ -356,7 +356,7 @@
     var existingRolesFiltered = ref<any>([]);
     var existingRoles = ref<any[]>([]);
     var existingRolesColumns = getExistingRolesColumns();
-    /*questo watch è necessario per ricaricare le traduzioni di title delle colonne,
+    /*questo watch Ã¨ necessario per ricaricare le traduzioni di title delle colonne,
      altrimenti restano sempre le stesse*/
     watch(locale, () => {
         existingRolesColumns = getExistingRolesColumns();
