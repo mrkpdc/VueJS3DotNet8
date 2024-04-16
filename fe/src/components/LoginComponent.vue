@@ -36,7 +36,7 @@
 </style>
 <script setup lang="ts">
     import { Auth } from '@/auth/auth';
-    //questo è usato sopra per far vedere lo username dell'utente loggato
+    //questo Ã¨ usato sopra per far vedere lo username dell'utente loggato
     import { useAuthStore } from '@/stores/auth';
     import { ref } from "vue";
 
@@ -46,7 +46,7 @@
 
     var isLoggedIn = ref(Auth.isLoggedIn());
 
-    /*questo serve per prendere se l'utente è loggato
+    /*questo serve per prendere se l'utente ï¿½ loggato
      e far vedere il form di login o il welcome*/
     const unsubscribe = useAuthStore().$onAction(
         ({

@@ -21,7 +21,7 @@ import naive from 'naive-ui';
 import 'bootstrap';
 
 /*questi due sono per usare bootstrap, e ovviamente
- l'ordine di import è importante, perché l'override
+ l'ordine di import Ã¨ importante, perchÃ© l'override
  deve essere caricato dopo bootstrap.*/
 import 'bootstrap/scss/bootstrap.scss';
 import '@/style/bootstrapOverrides.scss';
@@ -31,9 +31,9 @@ import '@/style/bootstrapOverrides.scss';
  il file globalVariables.module.scss invece viene caricato
  principalmente nell'App.vue per fare l'override del tema
  generico.
- può inoltre essere importato in qualsiasi component
+ puÃ² inoltre essere importato in qualsiasi component
  per leggerne le variabili.
- l'esempio è direttamente in globalVariables.module.scss
+ l'esempio Ã¨ direttamente in globalVariables.module.scss
  nel commento iniziale.
  viene caricato per ultimo per eventualmente sovrascrivere
  anche i settaggi di default di bootstrap*/
@@ -131,7 +131,7 @@ axios.interceptors.response.use(function (response) {
 
 const app = createApp(App);
 
-/*di default gli setto inglese, perché poi il valore effettivo
+/*di default gli setto inglese, perchÃ© poi il valore effettivo
  viene scritto in App.vue nell'onMounted*/
 const i18n = createI18n({
     legacy: false, // you must set `false`, to use Composition API
