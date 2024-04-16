@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { enUS, itIT, dateEnUS, dateItIT } from 'naive-ui';
 
-/*bisogna fare un if per ciascuna lingua perchè all'interno dei vari locale
+/*bisogna fare un if per ciascuna lingua perché all'interno dei vari locale
  di naive ui ci sono anche funzioni, che non si possono convertire in stringa
  e salvare nel localstorage :(*/
 export const useLanguageAndLocaleStore = defineStore('language', {
@@ -22,7 +22,7 @@ export const useLanguageAndLocaleStore = defineStore('language', {
                         dateLocale: dateItIT
                     };
             }
-            //valore di default � inglese
+            //valore di default è inglese
             return {
                 language: 'en',
                 locale: enUS,
