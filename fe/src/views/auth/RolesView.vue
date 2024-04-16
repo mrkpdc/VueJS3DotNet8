@@ -214,7 +214,7 @@
     var existingClaimsFiltered = ref<any>([]);
     var existingClaims = ref<any[]>([]);
     var existingClaimsColumns = getExistingClaimsColumns();
-    /*questo watch è necessario per ricaricare le traduzioni di title delle colonne,
+    /*questo watch Ã¨ necessario per ricaricare le traduzioni di title delle colonne,
      altrimenti restano sempre le stesse*/
     watch(locale, () => {
         existingClaimsColumns = getExistingClaimsColumns();
