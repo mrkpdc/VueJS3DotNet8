@@ -42,7 +42,7 @@
                         <n-drawer v-model:show="navBarIsOpen" :placement="'left'">
                             <!--<n-drawer-content :title="$t('applicationTitle')">-->
                             <n-drawer-content :body-content-style="{'padding':'0'}">
-                                <!--questo � un n-el per applicare lo stile con var() nel css, altrimenti in un div
+                                <!--questo è un n-el per applicare lo stile con var() nel css, altrimenti in un div
             normale non lo mette-->
                                 <n-el tag="div" class="navigationContainer layoutBGColor baseTextColor text-center">
                                     <h3 class="baseTextColor mt-3">{{$t('applicationTitle')}}</h3>
