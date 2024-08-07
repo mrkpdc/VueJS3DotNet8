@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "be", "be\be.csproj", "{111B
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "var", "var\", "{64ED4D96-BFC0-42B4-A43B-4CC8974FA2E6}"
 	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8.1"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_50587"
 		Debug.AspNetCompiler.PhysicalPath = "var\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50587\"
@@ -30,7 +30,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "fe", "fe\", "{1B40953F-74A7-42FD-BAD4-EDFADAAC1C23}"
 	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8.1"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_50718"
 		Debug.AspNetCompiler.PhysicalPath = "fe\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_50718\"
